@@ -60,23 +60,36 @@ fun main() = runBlocking {
 //        categories.collect { println("Recognized category: $it") }
 //    }
 
-    streamScoped {
+    suspend fun benchmark(
+        size: Int,
+        count: Int,
+        delay: Long,
+    ) {
         var max = 0L
         var min = 0L
         var sum = 0L
-        var count = 0
 
-        recognizer.benchmark().collect {
+        recognizer.benchmark(size, count, delay).collect {
             val diff = System.currentTimeMillis() - it.ts
-            println("Received image - diff: $diff, size: ${it.data.size}")
+//            println("Received image - diff: $diff, size: ${it.data.size}")
 
             max = max(diff, max)
             min = min(diff, min)
             sum += diff
-            count++
         }
 
-        println("Max: $max, Min: $min, Avg: ${sum / count}")
+        println("size: $size, count: $count, delay: $delay -> Max: $max, Min: $min, Avg: ${sum / count}")
+    }
+
+    streamScoped {
+        benchmark(size = 1280 * 720 * 4, count = 300, delay = 30)   // 3MB Warm up
+
+        benchmark(size = 1280 * 720 * 4, count = 300, delay = 30)   // 3MB
+        benchmark(size = 1024 * 1024, count = 300, delay = 30)      // 1MB
+        benchmark(size = 500 * 1024, count = 300, delay = 30)       // 500KB
+        benchmark(size = 100 * 1024, count = 300, delay = 30)       // 100KB
+        benchmark(size = 10 * 1024, count = 300, delay = 30)        // 10KB
+        benchmark(size = 1 * 1024, count = 300, delay = 30)         // 1KB
     }
 
 //    val duration = measureTime {

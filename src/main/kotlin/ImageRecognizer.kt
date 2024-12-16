@@ -40,7 +40,7 @@ interface ImageRecognizer : RemoteService {
 
     suspend fun recognizeAll(images: Flow<Image>): Flow<Category>
 
-    suspend fun benchmark(): Flow<Image>
+    suspend fun benchmark(size: Int, count: Int, delay: Long): Flow<Image>
 
     suspend fun benchmark2(): Image
 }
@@ -61,11 +61,11 @@ class ImageRecognizerService(override val coroutineContext: CoroutineContext) : 
         return images.map { recognize(it) }
     }
 
-    override suspend fun benchmark(): Flow<Image> {
+    override suspend fun benchmark(size: Int, count: Int, delay: Long): Flow<Image> {
         return flow {
-            repeat(300) {
-                delay(30)
-                emit(Image(ByteArray(1280 * 720 * 4) { 0x00 }))
+            repeat(count) {
+                delay(delay)
+                emit(Image(ByteArray(size) { 0x00 }))
             }
         }
     }

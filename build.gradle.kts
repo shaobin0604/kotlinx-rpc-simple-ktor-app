@@ -14,6 +14,7 @@ version = "0.0.1"
 
 application {
     mainClass.set("ServerKt")
+//    mainClass.set("ClientKt")
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
@@ -24,7 +25,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 dependencies {
