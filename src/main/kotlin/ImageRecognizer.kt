@@ -6,6 +6,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.rpc.RemoteService
 import kotlinx.rpc.RPCEagerField
@@ -15,10 +16,14 @@ import kotlin.coroutines.CoroutineContext
 
 @Suppress("ArrayInDataClass")
 @Serializable
-data class Image(val data: ByteArray) {
-    @OptIn(ExperimentalStdlibApi::class)
+data class Image(val data: ByteArray, val ts: Long = System.currentTimeMillis()) {
+//    @OptIn(ExperimentalStdlibApi::class)
+//    override fun toString(): String {
+//        return "Image(${data.joinToString("") { it.toHexString() }})"
+//    }
+
     override fun toString(): String {
-        return "Image(${data.joinToString("") { it.toHexString() }})"
+        return "Image(ts=$ts)"
     }
 }
 
@@ -34,6 +39,10 @@ interface ImageRecognizer : RemoteService {
     suspend fun recognize(image: Image): Category
 
     suspend fun recognizeAll(images: Flow<Image>): Flow<Category>
+
+    suspend fun benchmark(): Flow<Image>
+
+    suspend fun benchmark2(): Image
 }
 
 class ImageRecognizerService(override val coroutineContext: CoroutineContext) : ImageRecognizer {
@@ -50,5 +59,18 @@ class ImageRecognizerService(override val coroutineContext: CoroutineContext) : 
 
     override suspend fun recognizeAll(images: Flow<Image>): Flow<Category> {
         return images.map { recognize(it) }
+    }
+
+    override suspend fun benchmark(): Flow<Image> {
+        return flow {
+            repeat(300) {
+                delay(30)
+                emit(Image(ByteArray(1280 * 720 * 4) { 0x00 }))
+            }
+        }
+    }
+
+    override suspend fun benchmark2(): Image {
+        return Image(ByteArray(1280 * 720 * 4) { 0x00 })
     }
 }
