@@ -15,6 +15,7 @@ import kotlinx.rpc.withService
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.measureTime
 
 @ExperimentalSerializationApi
 fun main() = runBlocking {
@@ -82,25 +83,27 @@ fun main() = runBlocking {
     }
 
     streamScoped {
-        benchmark(size = 1280 * 720 * 4, count = 300, delay = 30)   // 3MB Warm up
+//        benchmark(size = 1280 * 720 * 4, count = 300, delay = 30)   // 3MB Warm up
 
-        benchmark(size = 1280 * 720 * 4, count = 300, delay = 30)   // 3MB
-        benchmark(size = 1024 * 1024, count = 300, delay = 30)      // 1MB
-        benchmark(size = 500 * 1024, count = 300, delay = 30)       // 500KB
-        benchmark(size = 100 * 1024, count = 300, delay = 30)       // 100KB
-        benchmark(size = 10 * 1024, count = 300, delay = 30)        // 10KB
-        benchmark(size = 1 * 1024, count = 300, delay = 30)         // 1KB
+//        benchmark(size = 1280 * 720 * 4, count = 300, delay = 30)   // 3MB
+//        benchmark(size = 1024 * 1024, count = 300, delay = 30)      // 1MB
+//        benchmark(size = 500 * 1024, count = 300, delay = 30)       // 500KB
+//        benchmark(size = 100 * 1024, count = 300, delay = 30)       // 100KB
+//        benchmark(size = 10 * 1024, count = 300, delay = 30)        // 10KB
+        benchmark(size = 1 * 1024, count = 100, delay = 30)         // 1KB
     }
 
-//    val duration = measureTime {
-//        repeat(10) {
-//            val image = recognizer.benchmark2()
-//            println("Received image: ${image.data.size}")
-//        }
-//    }
-//
-//    println("Duration: $duration")
+    suspend fun benchmark3(repeat: Int, count: Int) {
+        val duration = measureTime {
+            repeat(repeat) {
+                val personInfoList = recognizer.benchmark3(count)
+                println("Received personInfoList latency: ${System.currentTimeMillis() - personInfoList.ts}")
+            }
+        }
+        println("benchmark3 - repeat: $repeat, count: $count -> total duration: $duration, avg: ${duration.inWholeMilliseconds / repeat}")
+    }
 
+    benchmark3(repeat = 10, count = 40)
 
     recognizer.cancel()
     ktorClient.close()
